@@ -1,16 +1,22 @@
 package main
 
 import (
+	"github.com/alexflint/go-arg"
 	"github.com/kenpusney/cra/core"
+	"os"
 )
 
 func main() {
+	var opts core.Opts
 
-	context := core.NewContext(&core.Opts{
-		FollowLocation: false,
-	})
+	p := arg.MustParse(&opts)
 
-	context.Endpoint = "http://localhost:8080"
+	if opts.Endpoint == "" {
+		p.WriteHelp(os.Stdout)
+		return
+	}
 
-	context.Serve()
+	context := core.NewContext(&opts)
+
+	_ = context.Serve()
 }

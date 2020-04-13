@@ -3,8 +3,9 @@ package core
 import "net/http"
 
 type Opts struct {
-	FollowLocation bool
-	Port           int
+	Endpoint string `arg:"positional"`
+	//FollowLocation bool   `arg:"-f" default:"false"`
+	Port int `arg:"-p" default:"9511"`
 }
 
 type Strategy = func(craRequest *Request, context *Context, completer ResponseCompleter)

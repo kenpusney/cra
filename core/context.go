@@ -17,6 +17,7 @@ func NewContext(opts *Opts) *Context {
 
 	context.client = &http.Client{}
 	context.server = &http.Server{Addr: context.addr(), Handler: context.mux}
+	context.Endpoint = opts.Endpoint
 
 	context.strategies = make(map[string]Strategy)
 
