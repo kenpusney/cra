@@ -27,8 +27,7 @@ type RequestItem struct {
 	Endpoint string      `json:"endpoint"`
 	Method   string      `json:"method"`
 	Type     string      `json:"type"`
-	Json     interface{} `json:"json"`
-	Bytes    string      `json:"bytes"`
+	Body     interface{} `json:"body"`
 }
 
 type Request struct {

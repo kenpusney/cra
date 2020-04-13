@@ -1,6 +1,8 @@
 package core
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -69,6 +71,13 @@ func (context *Context) Proceed(reqItem *RequestItem) *ResponseItem {
 	fillRequests(reqItem)
 
 	var requestBody io.Reader
+
+	if reqItem.Type == "json" {
+		b, _ := json.Marshal(reqItem.Body)
+		requestBody = bytes.NewReader(b)
+	} else {
+		requestBody = base64.NewDecoder(base64.RawStdEncoding, strings.NewReader(reqItem.Body.(string)))
+	}
 
 	request, err := http.NewRequest(reqItem.Method, context.Endpoint+reqItem.Endpoint, requestBody)
 	if err != nil {
