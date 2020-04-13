@@ -2,15 +2,12 @@ package core
 
 import "net/http"
 
-// argparsing https://github.com/alexflint/go-arg
 type Opts struct {
 	FollowLocation bool
 	Port           int
 }
 
-type Strategy interface {
-	Invoke(craRequest *Request, context *Context) Response
-}
+type Strategy = func(craRequest *Request, context *Context, completer ResponseCompleter)
 
 type ResponseCompleter = func(response *Response)
 

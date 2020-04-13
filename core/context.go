@@ -18,7 +18,15 @@ func NewContext(opts *Opts) *Context {
 	context.client = &http.Client{}
 	context.server = &http.Server{Addr: context.addr(), Handler: context.mux}
 
+	context.strategies = make(map[string]Strategy)
+
+	context.strategies["seq"] = Sequential
+	context.strategies["con"] = Concurrent
 	return context
+}
+
+func (context *Context) Register(ty string, strategy Strategy) {
+	context.strategies[ty] = strategy
 }
 
 func (context *Context) Serve() error {
@@ -43,8 +51,15 @@ func (context *Context) Serve() error {
 }
 
 func (context *Context) processRequest(craRequest *Request, completer ResponseCompleter) {
-	Concurrent(craRequest, context, completer)
 
+	if craRequest.Mode == "" {
+		craRequest.Mode = "seq"
+	}
+
+	strategy := context.strategies[craRequest.Mode]
+	if strategy != nil {
+		strategy(craRequest, context, completer)
+	}
 }
 
 func (context *Context) Proceed(reqItem *RequestItem) *ResponseItem {
