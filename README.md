@@ -42,8 +42,20 @@ In the example above, we've defined two cascading requests
 its predecessor). CRA will run these 2 requests one by one,
 create a user and then retrieves its profile.
 
+## Why golang
+
+ - **static linked distribution**: it is important this kind of tools runs
+   on same platform without any dependency. golang provides the mechanism.
+ - **concurrency-native support**: goroutine are simpler than thread based
+   concurrency.
+ - **better ecosystem for web applications**
+
 ## TODO
 
 - [ ] More options
 - [ ] Implement cascading
 - [ ] Add doc
+- [ ] Bypassing headers
+
+## Q &amp; A
+
