@@ -1,13 +1,9 @@
 package core
 
 import (
-	"bytes"
-	"encoding/base64"
 	"encoding/json"
-	"io"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 type basicContext struct {
@@ -56,7 +52,6 @@ func (context *basicContext) Serve() error {
 			if err != nil {
 				return
 			}
-
 			_, _ = w.Write(marshal)
 		})
 
@@ -78,51 +73,23 @@ func (context *basicContext) processRequest(craRequest *Request, completer Respo
 }
 
 func (context *basicContext) Proceed(reqItem *RequestItem) *ResponseItem {
-	resItem := &ResponseItem{Id: reqItem.Id}
 
 	fillRequests(reqItem)
 
-	var requestBody io.Reader
-
-	if reqItem.Type == "json" {
-		b, _ := json.Marshal(reqItem.Body)
-		requestBody = bytes.NewReader(b)
-	} else {
-		requestBody = base64.NewDecoder(base64.RawStdEncoding, strings.NewReader(reqItem.Body.(string)))
-	}
+	requestBody := decodeRequestBody(reqItem)
 
 	request, err := http.NewRequest(reqItem.Method, context.Endpoint+reqItem.Endpoint, requestBody)
+
 	if err != nil {
-		resItem.Error = SystemErrorResponse(err)
-		return resItem
+		return &ResponseItem{Id: reqItem.Id, Error: SystemErrorResponse(err)}
 	}
 
 	response, err := context.client.Do(request)
 	if err != nil {
-		resItem.Error = SystemErrorResponse(err)
-		return resItem
+		return &ResponseItem{Id: reqItem.Id, Error: SystemErrorResponse(err)}
 	}
 
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		resItem.Error = UpstreamErrorResponse(response)
-	}
-
-	if strings.Contains(response.Header.Get("Content-Type"), "json") {
-		resItem.Type = "json"
-		resItem.Body = ConvertJsonBodyToObject(response.Body)
-	} else {
-		resItem.Type = "binary"
-		resItem.Body = ReadBytes(response.Body)
-	}
-	if resItem.Error != nil {
-		resItem.Error.Body = resItem.Body
-	}
-	return resItem
-}
-func fillRequests(req *RequestItem) {
-	if req.Method == "" {
-		req.Method = "GET"
-	}
+	return formatResponse(response, reqItem.Id)
 }
 
 func (context *basicContext) addr() string {
