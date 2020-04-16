@@ -59,6 +59,7 @@ create a user and then retrieves its profile.
 - [X] Implement cascading
 - [ ] Add doc
 - [ ] Bypassing headers
+- [ ] ID generating strategy
 
 ## Q &amp; A
 
