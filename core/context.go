@@ -26,6 +26,7 @@ func NewContext(opts *Opts) *Context {
 	context.strategies["seq"] = Sequential
 	context.strategies["con"] = Concurrent
 	context.strategies["cascaded"] = Cascaded
+	context.strategies["batch"] = Batch
 	return context
 }
 

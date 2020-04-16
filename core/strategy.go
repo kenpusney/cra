@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/cbroglie/mustache"
 	"github.com/oliveagle/jsonpath"
+	"reflect"
 )
 
 func Sequential(craRequest *Request, context *Context, completer ResponseCompleter) {
@@ -91,4 +92,63 @@ func rebuildRequestItem(cascadeContext CascadeContext, request *RequestItem) *Re
 	}
 
 	return newRequest
+}
+
+func Batch(craRequest *Request, context *Context, completer ResponseCompleter) {
+	var craResponses []*ResponseItem
+	var resItem *ResponseItem
+
+	var seed = make(CascadeContext)
+
+	if craRequest.Seed == nil {
+		seed = craRequest.Data
+	} else {
+		request := craRequest.Seed
+		resItem := context.Proceed(request)
+		if request.Cascading != nil && len(request.Cascading) != 0 {
+			for key, value := range request.Cascading {
+				lookup, _ := jsonpath.JsonPathLookup(resItem.Body, value)
+				seed[key] = lookup
+			}
+		}
+	}
+
+	for _, originalRequest := range craRequest.Requests {
+		if originalRequest.Batch == nil {
+			break
+		}
+
+		data := asArray(seed[*originalRequest.Batch])
+
+		if len(data) > 0 {
+			for _, v := range data {
+				request := rebuildRequestItem(map[string]interface{}{
+					*originalRequest.Batch: v,
+				}, originalRequest)
+				resItem = context.Proceed(request)
+				craResponses = append(craResponses,
+					resItem)
+			}
+		}
+	}
+
+	response := &Response{
+		Id:       "id",
+		Response: craResponses,
+	}
+	completer(response)
+}
+
+func asArray(object interface{}) []interface{} {
+	var result []interface{}
+
+	switch reflect.TypeOf(object).Kind() {
+	case reflect.Slice, reflect.Array:
+		s := reflect.ValueOf(object)
+		for i := 0; i < s.Len(); i++ {
+			result = append(result, s.Index(i).Interface())
+		}
+	}
+
+	return result
 }

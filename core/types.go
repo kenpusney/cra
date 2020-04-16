@@ -30,12 +30,15 @@ type RequestItem struct {
 	Body     interface{} `json:"body"`
 	// only for cascaded mode
 	Cascading map[string]string `json:"cascading"`
+	Batch     *string           `json:"batch"`
 }
 
 type Request struct {
-	Mode     string         `json:"mode"`
-	Id       string         `json:"id"`
-	Requests []*RequestItem `json:"requests"`
+	Mode     string                 `json:"mode"`
+	Id       string                 `json:"id"`
+	Requests []*RequestItem         `json:"requests"`
+	Seed     *RequestItem           `json:"seed"`
+	Data     map[string]interface{} `json:"data"`
 }
 
 type ResponseItem struct {
