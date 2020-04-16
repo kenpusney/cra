@@ -14,6 +14,7 @@ type Context interface {
 	Register(ty string, strategy Strategy)
 	Serve() error
 	Proceed(reqItem *RequestItem) *ResponseItem
+	Shutdown()
 }
 
 type RequestItem struct {

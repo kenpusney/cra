@@ -15,6 +15,10 @@ func (TestContext) Serve() error {
 	panic("implement me")
 }
 
+func (TestContext) Shutdown() {
+	panic("implement me")
+}
+
 func (TestContext) Proceed(reqItem *RequestItem) *ResponseItem {
 	return &ResponseItem{
 		Id: reqItem.Id,

@@ -29,13 +29,15 @@ func formatResponse(response *http.Response, requestId string) *ResponseItem {
 }
 
 func decodeRequestBody(reqItem *RequestItem) io.Reader {
-	var requestBody io.Reader
+	var requestBody io.Reader = strings.NewReader("")
 
 	if reqItem.Type == "json" {
 		b, _ := json.Marshal(reqItem.Body)
 		requestBody = bytes.NewReader(b)
 	} else {
-		requestBody = base64.NewDecoder(base64.RawStdEncoding, strings.NewReader(reqItem.Body.(string)))
+		if reqItem.Body != nil {
+			requestBody = base64.NewDecoder(base64.RawStdEncoding, strings.NewReader(reqItem.Body.(string)))
+		}
 	}
 	return requestBody
 }
