@@ -16,12 +16,10 @@ func Sequential(craRequest *Request, context Context, completer ResponseComplete
 			context.Proceed(request))
 	}
 
-	response := &Response{
+	completer(&Response{
 		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
-	}
-
-	completer(response)
+	})
 }
 
 func Concurrent(craRequest *Request, context Context, completer ResponseCompleter) {
@@ -70,12 +68,10 @@ func Cascaded(craRequest *Request, context Context, completer ResponseCompleter)
 		}
 	}
 
-	response := &Response{
+	completer(&Response{
 		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
-	}
-
-	completer(response)
+	})
 }
 
 func rebuildRequestItem(cascadeContext CascadeContext, request *RequestItem) *RequestItem {
@@ -125,14 +121,13 @@ func Batch(craRequest *Request, context Context, completer ResponseCompleter) {
 			break
 		}
 
-		data := asArray(seed[*originalRequest.Batch])
+		name := *originalRequest.Batch
+		seedData := asArray(seed[name])
 
-		if len(data) > 0 {
-			for i, v := range data {
-				request := rebuildRequestItem(map[string]interface{}{
-					*originalRequest.Batch: v,
-				}, originalRequest)
-				request.Id = GenerateId(originalRequest.Id, uuid.New().String(), i)
+		if len(seedData) > 0 {
+			for index, value := range seedData {
+				request := rebuildRequestItem(newContext(name, value), originalRequest)
+				request.Id = GenerateId(originalRequest.Id, uuid.New().String(), index)
 				resItem = context.Proceed(request)
 				craResponses = append(craResponses,
 					resItem)
@@ -140,11 +135,14 @@ func Batch(craRequest *Request, context Context, completer ResponseCompleter) {
 		}
 	}
 
-	response := &Response{
+	completer(&Response{
 		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
-	}
-	completer(response)
+	})
+}
+
+func newContext(name string, value interface{}) map[string]interface{} {
+	return map[string]interface{}{name: value}
 }
 
 func asArray(object interface{}) []interface{} {
@@ -152,9 +150,9 @@ func asArray(object interface{}) []interface{} {
 
 	switch reflect.TypeOf(object).Kind() {
 	case reflect.Slice, reflect.Array:
-		s := reflect.ValueOf(object)
-		for i := 0; i < s.Len(); i++ {
-			result = append(result, s.Index(i).Interface())
+		value := reflect.ValueOf(object)
+		for index := 0; index < value.Len(); index++ {
+			result = append(result, value.Index(index).Interface())
 		}
 	}
 
