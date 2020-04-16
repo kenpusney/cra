@@ -7,4 +7,5 @@ require (
 	github.com/cbroglie/mustache v1.0.1
 	github.com/google/uuid v1.1.1
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852
+	github.com/stretchr/testify v1.2.2
 )

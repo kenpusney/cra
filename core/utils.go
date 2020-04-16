@@ -7,17 +7,17 @@ import (
 	"io/ioutil"
 )
 
-func ConvertJsonBodyToObject(body io.ReadCloser) interface{} {
-	bytes := ConvertJsonBodyToBytes(body)
-	if bytes != nil {
-		var result interface{}
-		json.Unmarshal(bytes, &result)
-		return result
+func ConvertJsonBodyToObject(body io.Reader) interface{} {
+	bytes := ReadBytes(body)
+	var object interface{}
+	UnmarshallJsonObject(bytes, &object)
+	if object == nil {
+		return nil
 	}
-	return nil
+	return object
 }
 
-func ConvertJsonBodyToBytes(body io.ReadCloser) []byte {
+func ReadBytes(body io.Reader) []byte {
 	all, err := ioutil.ReadAll(body)
 	if err != nil {
 		return nil
@@ -27,9 +27,10 @@ func ConvertJsonBodyToBytes(body io.ReadCloser) []byte {
 
 func UnmarshallJsonObject(bytes []byte, object interface{}) interface{} {
 	if bytes != nil {
-		json.Unmarshal(bytes, object)
+		_ = json.Unmarshal(bytes, object)
+		return object
 	}
-	return object
+	return nil
 }
 
 func GenerateId(requestId string, uuid string, index int) string {

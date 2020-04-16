@@ -48,7 +48,7 @@ func (context *basicContext) Serve() error {
 	context.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var craRequest Request
 
-		UnmarshallJsonObject(ConvertJsonBodyToBytes(r.Body),
+		UnmarshallJsonObject(ReadBytes(r.Body),
 			&craRequest)
 
 		context.processRequest(&craRequest, func(response *Response) {
@@ -112,7 +112,7 @@ func (context *basicContext) Proceed(reqItem *RequestItem) *ResponseItem {
 		resItem.Body = ConvertJsonBodyToObject(response.Body)
 	} else {
 		resItem.Type = "binary"
-		resItem.Body = ConvertJsonBodyToBytes(response.Body)
+		resItem.Body = ReadBytes(response.Body)
 	}
 	if resItem.Error != nil {
 		resItem.Error.Body = resItem.Body

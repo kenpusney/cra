@@ -6,7 +6,7 @@ type Opts struct {
 	Port int `arg:"-p" default:"9511"`
 }
 
-type Strategy = func(craRequest *Request, context Context, completer ResponseCompleter)
+type Strategy func(craRequest *Request, context Context, completer ResponseCompleter)
 
 type ResponseCompleter = func(response *Response)
 
