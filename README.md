@@ -1,5 +1,7 @@
 # CRA
 
+[中文README](./README.cn.md)
+
 Concurrent Request Agent
 
 ## Usage
