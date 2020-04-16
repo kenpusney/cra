@@ -51,7 +51,7 @@ Started at port: 9511 Proxying: https://the-api-you-need-to-visit.com/api/v1
 - 顺序执行 (`seq`): 按照请求给定的顺序依次执行请求
 - 并发执行 (`con`): 使用goroutine批量运行请求，返回结果可能是乱序的
 - 层叠执行 (`cascaded`): 按照顺序执行给定的请求，并且可以保存返回结果以便后续请求参数化调用
-- **[TODO]** 批量执行 (`batch`): 使用请求中提供的数据或者请求获取到的数据进行批量操作
+- 批量执行 (`batch`): 使用请求中提供的数据或者请求获取到的数据进行批量操作
   
 ### 层叠执行模式（cascaded）
 

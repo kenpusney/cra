@@ -54,7 +54,7 @@ create a user and then retrieves its profile.
   response may out of order.
 - Cascaded (`cascaded`): Executing requests in given order, 
   and subsequent request can be parameterized using previous response.
-- **[TODO]** Batch (`batch`): Executing requests in batching using data provided
+- Batch (`batch`): Executing requests in batching using data provided
   in request or from previous response.
   
 ### Cascaded mode
