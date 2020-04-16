@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 )
@@ -29,4 +30,14 @@ func UnmarshallJsonObject(bytes []byte, object interface{}) interface{} {
 		json.Unmarshal(bytes, object)
 	}
 	return object
+}
+
+func GenerateId(requestId string, uuid string, index int) string {
+	if len(requestId) == 0 {
+		requestId = uuid
+	}
+	if index >= 0 {
+		return fmt.Sprintf("%s-%d", requestId, index)
+	}
+	return requestId
 }

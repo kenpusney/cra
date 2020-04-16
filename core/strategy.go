@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/json"
 	"github.com/cbroglie/mustache"
+	"github.com/google/uuid"
 	"github.com/oliveagle/jsonpath"
 	"reflect"
 )
@@ -10,12 +11,13 @@ import (
 func Sequential(craRequest *Request, context *Context, completer ResponseCompleter) {
 	var craResponses []*ResponseItem
 	for _, request := range craRequest.Requests {
+		request.Id = GenerateId(request.Id, uuid.New().String(), -1)
 		craResponses = append(craResponses,
 			context.Proceed(request))
 	}
 
 	response := &Response{
-		Id:       "id",
+		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
 	}
 
@@ -27,6 +29,7 @@ func Concurrent(craRequest *Request, context *Context, completer ResponseComplet
 	var craResponses []*ResponseItem
 
 	for _, request := range craRequest.Requests {
+		request.Id = GenerateId(request.Id, uuid.New().String(), -1)
 		go func(request *RequestItem) {
 			ch <- context.Proceed(request)
 		}(request)
@@ -38,7 +41,7 @@ func Concurrent(craRequest *Request, context *Context, completer ResponseComplet
 	}
 
 	completer(&Response{
-		Id:       "id",
+		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
 	})
 	close(ch)
@@ -52,6 +55,7 @@ func Cascaded(craRequest *Request, context *Context, completer ResponseCompleter
 	cascadeContext := make(CascadeContext)
 
 	for _, request := range craRequest.Requests {
+		request.Id = GenerateId(request.Id, uuid.New().String(), -1)
 		if len(cascadeContext) > 0 {
 			request = rebuildRequestItem(cascadeContext, request)
 		}
@@ -67,7 +71,7 @@ func Cascaded(craRequest *Request, context *Context, completer ResponseCompleter
 	}
 
 	response := &Response{
-		Id:       "id",
+		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
 	}
 
@@ -104,6 +108,7 @@ func Batch(craRequest *Request, context *Context, completer ResponseCompleter) {
 		seed = craRequest.Data
 	} else {
 		request := craRequest.Seed
+		request.Id = GenerateId(request.Id, uuid.New().String(), -1)
 		resItem := context.Proceed(request)
 		if request.Cascading != nil && len(request.Cascading) != 0 {
 			for key, value := range request.Cascading {
@@ -114,6 +119,8 @@ func Batch(craRequest *Request, context *Context, completer ResponseCompleter) {
 	}
 
 	for _, originalRequest := range craRequest.Requests {
+		originalRequest.Id = GenerateId(originalRequest.Id, uuid.New().String(), -1)
+
 		if originalRequest.Batch == nil {
 			break
 		}
@@ -121,10 +128,11 @@ func Batch(craRequest *Request, context *Context, completer ResponseCompleter) {
 		data := asArray(seed[*originalRequest.Batch])
 
 		if len(data) > 0 {
-			for _, v := range data {
+			for i, v := range data {
 				request := rebuildRequestItem(map[string]interface{}{
 					*originalRequest.Batch: v,
 				}, originalRequest)
+				request.Id = GenerateId(originalRequest.Id, uuid.New().String(), i)
 				resItem = context.Proceed(request)
 				craResponses = append(craResponses,
 					resItem)
@@ -133,7 +141,7 @@ func Batch(craRequest *Request, context *Context, completer ResponseCompleter) {
 	}
 
 	response := &Response{
-		Id:       "id",
+		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
 	}
 	completer(response)

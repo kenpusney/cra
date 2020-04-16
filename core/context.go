@@ -68,7 +68,7 @@ func (context *Context) processRequest(craRequest *Request, completer ResponseCo
 }
 
 func (context *Context) Proceed(reqItem *RequestItem) *ResponseItem {
-	resItem := &ResponseItem{Id: "internal_id_"}
+	resItem := &ResponseItem{Id: reqItem.Id}
 
 	fillRequests(reqItem)
 

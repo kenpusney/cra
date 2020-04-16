@@ -129,7 +129,7 @@ see `core/types.go`
 - [X] Implement cascading
 - [ ] Add doc
 - [ ] Bypassing headers
-- [ ] ID generating strategy
+- [X] ID generating strategy
 
 ## Q &amp; A
 
