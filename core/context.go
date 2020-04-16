@@ -25,6 +25,7 @@ func NewContext(opts *Opts) *Context {
 
 	context.strategies["seq"] = Sequential
 	context.strategies["con"] = Concurrent
+	context.strategies["cascaded"] = Cascaded
 	return context
 }
 
@@ -45,7 +46,7 @@ func (context *Context) Serve() error {
 				return
 			}
 
-			w.Write(marshal)
+			_, _ = w.Write(marshal)
 		})
 
 	})

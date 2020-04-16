@@ -27,10 +27,13 @@ Example:
       "body": {
         "username": "userxxxxxx",
         "password": "pwdxxxxxxx"
+      },
+      "cascading": {
+        "id": "$.id"
       }
     },
     {
-      "endpoint": "/user/{id}",
+      "endpoint": "/user/{{id}}",
       "method": "get"
     }
   ]
@@ -53,7 +56,7 @@ create a user and then retrieves its profile.
 ## TODO
 
 - [ ] More options
-- [ ] Implement cascading
+- [X] Implement cascading
 - [ ] Add doc
 - [ ] Bypassing headers
 

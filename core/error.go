@@ -1,12 +1,9 @@
 package core
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 )
-
-var ErrServerStarted = errors.New("server already started")
 
 func UpstreamErrorResponse(response *http.Response) *ResponseError {
 	return &ResponseError{
