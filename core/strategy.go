@@ -3,7 +3,7 @@ package core
 import (
 	"encoding/json"
 	"github.com/cbroglie/mustache"
-	"github.com/yalp/jsonpath"
+	"github.com/oliveagle/jsonpath"
 )
 
 func Sequential(craRequest *Request, context *Context, completer ResponseCompleter) {
@@ -59,7 +59,7 @@ func Cascaded(craRequest *Request, context *Context, completer ResponseCompleter
 			resItem)
 		if request.Cascading != nil && len(request.Cascading) != 0 {
 			for key, value := range request.Cascading {
-				lookup, _ := jsonpath.Read(resItem.Body, value)
+				lookup, _ := jsonpath.JsonPathLookup(resItem.Body, value)
 				cascadeContext[key] = lookup
 			}
 		}
