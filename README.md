@@ -45,6 +45,71 @@ In the example above, we've defined two cascading requests
 its predecessor). CRA will run these 2 requests one by one,
 create a user and then retrieves its profile.
 
+## Modes
+
+- Sequential (`seq`): Executing requests in given order.
+- Concurrent (`con`): Executing every request in a goroutine, 
+  response may out of order.
+- Cascaded (`cascaded`): Executing requests in given order, 
+  and subsequent request can be parameterized using previous response.
+- **[TODO]** Batch (`batch`): Executing requests in batching using data provided
+  in request or from previous response.
+  
+### Cascaded mode
+
+In cascaded mode, you can save response's data to a context using jsonpath, and
+retrieve it in subsequent requests using Mustache template.
+
+For example:
+```javascript
+{
+  "mode": "cascaded",
+  "requests": [
+    {
+      "type": "json",
+      "endpoint": "/test.json",
+      // cascading: save to context
+      "cascading": {
+        "value": "$.value"
+      }
+    },
+    {
+      "type": "json",
+      // retrieve the value from context
+      "endpoint": "/{{value}}.json"
+    }
+  ]
+}
+```
+
+### Batch mode
+
+In batch mode, you need to specify a list of data as a seed to run the batch
+request, either in request spec or using response.
+
+For example, if you need to delete all expired resource:
+```javascript
+{
+  "mode": "batch",
+  "requests": [
+    {
+      "type": "json",
+      "endpoint": "/resources?status=expired",
+      "seed": {
+        // must be an array
+        "id": "$.resources[:].id"
+      }
+    },
+    {
+      "type": "json",
+      "method": "delete",
+      "endpoint": "/resource/{{id}}",
+      "batch": ["id"]
+    }
+  ]
+}
+```
+
 ## Why golang
 
  - **static linked distribution**: it is important this kind of tools runs
