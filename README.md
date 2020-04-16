@@ -110,6 +110,10 @@ For example, if you need to delete all expired resource:
 }
 ```
 
+## CRA request schema
+
+see `core/types.go`
+
 ## Why golang
 
  - **static linked distribution**: it is important this kind of tools runs

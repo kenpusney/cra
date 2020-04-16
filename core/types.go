@@ -23,11 +23,12 @@ type Context struct {
 }
 
 type RequestItem struct {
-	Id        string            `json:"id"`
-	Endpoint  string            `json:"endpoint"`
-	Method    string            `json:"method"`
-	Type      string            `json:"type"`
-	Body      interface{}       `json:"body"`
+	Id       string      `json:"id"`
+	Endpoint string      `json:"endpoint"`
+	Method   string      `json:"method"`
+	Type     string      `json:"type"`
+	Body     interface{} `json:"body"`
+	// only for cascaded mode
 	Cascading map[string]string `json:"cascading"`
 }
 
