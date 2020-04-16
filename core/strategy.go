@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-func Sequential(craRequest *Request, context *Context, completer ResponseCompleter) {
+func Sequential(craRequest *Request, context Context, completer ResponseCompleter) {
 	var craResponses []*ResponseItem
 	for _, request := range craRequest.Requests {
 		request.Id = GenerateId(request.Id, uuid.New().String(), -1)
@@ -24,7 +24,7 @@ func Sequential(craRequest *Request, context *Context, completer ResponseComplet
 	completer(response)
 }
 
-func Concurrent(craRequest *Request, context *Context, completer ResponseCompleter) {
+func Concurrent(craRequest *Request, context Context, completer ResponseCompleter) {
 	ch := make(chan *ResponseItem, len(craRequest.Requests))
 	var craResponses []*ResponseItem
 
@@ -49,7 +49,7 @@ func Concurrent(craRequest *Request, context *Context, completer ResponseComplet
 
 type CascadeContext = map[string]interface{}
 
-func Cascaded(craRequest *Request, context *Context, completer ResponseCompleter) {
+func Cascaded(craRequest *Request, context Context, completer ResponseCompleter) {
 	var craResponses []*ResponseItem
 	var resItem *ResponseItem
 	cascadeContext := make(CascadeContext)
@@ -98,7 +98,7 @@ func rebuildRequestItem(cascadeContext CascadeContext, request *RequestItem) *Re
 	return newRequest
 }
 
-func Batch(craRequest *Request, context *Context, completer ResponseCompleter) {
+func Batch(craRequest *Request, context Context, completer ResponseCompleter) {
 	var craResponses []*ResponseItem
 	var resItem *ResponseItem
 

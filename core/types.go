@@ -1,25 +1,19 @@
 package core
 
-import "net/http"
-
 type Opts struct {
 	Endpoint string `arg:"positional"`
 	//FollowLocation bool   `arg:"-f" default:"false"`
 	Port int `arg:"-p" default:"9511"`
 }
 
-type Strategy = func(craRequest *Request, context *Context, completer ResponseCompleter)
+type Strategy = func(craRequest *Request, context Context, completer ResponseCompleter)
 
 type ResponseCompleter = func(response *Response)
 
-type Context struct {
-	Opts     *Opts
-	Endpoint string
-	client   *http.Client
-	server   *http.Server
-	mux      *http.ServeMux
-
-	strategies map[string]Strategy
+type Context interface {
+	Register(ty string, strategy Strategy)
+	Serve() error
+	Proceed(reqItem *RequestItem) *ResponseItem
 }
 
 type RequestItem struct {

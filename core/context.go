@@ -10,8 +10,18 @@ import (
 	"strings"
 )
 
-func NewContext(opts *Opts) *Context {
-	context := &Context{}
+type basicContext struct {
+	Opts     *Opts
+	Endpoint string
+	client   *http.Client
+	server   *http.Server
+	mux      *http.ServeMux
+
+	strategies map[string]Strategy
+}
+
+func NewContext(opts *Opts) Context {
+	context := &basicContext{}
 
 	context.Opts = opts
 
@@ -30,11 +40,11 @@ func NewContext(opts *Opts) *Context {
 	return context
 }
 
-func (context *Context) Register(ty string, strategy Strategy) {
+func (context *basicContext) Register(ty string, strategy Strategy) {
 	context.strategies[ty] = strategy
 }
 
-func (context *Context) Serve() error {
+func (context *basicContext) Serve() error {
 	context.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var craRequest Request
 
@@ -55,7 +65,7 @@ func (context *Context) Serve() error {
 	return context.server.ListenAndServe()
 }
 
-func (context *Context) processRequest(craRequest *Request, completer ResponseCompleter) {
+func (context *basicContext) processRequest(craRequest *Request, completer ResponseCompleter) {
 
 	if craRequest.Mode == "" {
 		craRequest.Mode = "seq"
@@ -67,7 +77,7 @@ func (context *Context) processRequest(craRequest *Request, completer ResponseCo
 	}
 }
 
-func (context *Context) Proceed(reqItem *RequestItem) *ResponseItem {
+func (context *basicContext) Proceed(reqItem *RequestItem) *ResponseItem {
 	resItem := &ResponseItem{Id: reqItem.Id}
 
 	fillRequests(reqItem)
@@ -115,7 +125,7 @@ func fillRequests(req *RequestItem) {
 	}
 }
 
-func (context *Context) addr() string {
+func (context *basicContext) addr() string {
 	if context.Opts.Port > 1000 {
 		return ":" + strconv.Itoa(context.Opts.Port)
 	}
