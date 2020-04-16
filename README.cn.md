@@ -87,20 +87,19 @@ Started at port: 9511 Proxying: https://the-api-you-need-to-visit.com/api/v1
 ```javascript
 {
   "mode": "batch",
+  "seed": {
+    "type": "json",
+    "endpoint": "/resources?status=expired",
+    "cascading": {
+      "id": "$.resources[:].id"
+    }
+  },
   "requests": [
-    {
-      "type": "json",
-      "endpoint": "/resources?status=expired",
-      "seed": {
-        // must be an array
-        "id": "$.resources[:].id"
-      }
-    },
     {
       "type": "json",
       "method": "delete",
       "endpoint": "/resource/{{id}}",
-      "batch": ["id"]
+      "batch": "id"
     }
   ]
 }
