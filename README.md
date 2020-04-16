@@ -125,12 +125,13 @@ see `core/types.go`
 
 ## TODO
 
-- [ ] More options
 - [X] Implement cascading
 - [ ] Add doc
 - [ ] Bypassing headers
 - [X] ID generating strategy
 - [ ] Unit test for `context.go`
+- [ ] Error handle
+- [ ] More options
 
 ## Q &amp; A
 
