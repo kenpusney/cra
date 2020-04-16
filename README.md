@@ -5,9 +5,9 @@ Concurrent Request Agent
 ## Usage
 
 ```
-go get github.com/kenpusney/cra
-
-cra https://the-api-you-need-to-visit.com/api/v1
+> go get github.com/kenpusney/cra
+> cra https://the-api-you-need-to-visit.com/api/v1
+Started at port: 9511 Proxying: https://the-api-you-need-to-visit.com/api/v1
 ```
 
 Then you can use CRA DSL to send multiple request in single HTTP transaction.
