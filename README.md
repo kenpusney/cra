@@ -135,3 +135,29 @@ see `core/types.go`
 
 ## Q &amp; A
 
+## More Examples
+
+### Retrieve my GitHub Repo in batch
+
+```
+{
+  "id": "batching",
+  "mode": "batch",
+  "seed": {
+    "id": "seed",
+    "type": "json",
+    "endpoint": "/users/kenpusney/repos",
+    "cascading": {
+      "repo": "$.[:].full_name"
+    }
+  },
+  "requests": [
+    {
+      "id": "repo",
+      "type": "json",
+      "endpoint": "/repos/{{repo}}",
+      "batch": "repo"
+    }
+  ]
+}
+```
