@@ -49,10 +49,6 @@ func (req *Request) AttachOriginalRequest(r *http.Request) {
 	}
 }
 
-func (req *RequestItem) OriginalRequest() *http.Request {
-	return req.r
-}
-
 func (req *RequestItem) RequestHeaders() http.Header {
 	if req.r != nil {
 		return req.r.Header
