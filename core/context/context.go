@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-type basicContext struct {
+type CoreContext struct {
 	Opts     *common.Opts
 	Endpoint string
 	client   *http.Client
@@ -23,8 +23,8 @@ type basicContext struct {
 	config *common.Config
 }
 
-func MakeContext(opts *common.Opts, config *common.Config) common.Context {
-	ctx := &basicContext{}
+func MakeContext(opts *common.Opts, config *common.Config) *CoreContext {
+	ctx := &CoreContext{}
 
 	ctx.Opts = opts
 	ctx.config = config
@@ -39,15 +39,15 @@ func MakeContext(opts *common.Opts, config *common.Config) common.Context {
 	return ctx
 }
 
-func (bc *basicContext) Shutdown() {
+func (bc *CoreContext) Shutdown() {
 	_ = bc.server.Shutdown(context.Background())
 }
 
-func (bc *basicContext) Register(ty string, strategy common.Strategy) {
+func (bc *CoreContext) Register(ty string, strategy common.Strategy) {
 	bc.strategies[ty] = strategy
 }
 
-func (bc *basicContext) Serve() error {
+func (bc *CoreContext) Serve() error {
 	bc.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var craRequest contract.Request
 
@@ -76,7 +76,7 @@ func (bc *basicContext) Serve() error {
 	return bc.server.ListenAndServe()
 }
 
-func (bc *basicContext) processRequest(craRequest *contract.Request, completer contract.ResponseCompleter) {
+func (bc *CoreContext) processRequest(craRequest *contract.Request, completer contract.ResponseCompleter) {
 
 	if craRequest.Mode == "" {
 		craRequest.Mode = "seq"
@@ -88,7 +88,7 @@ func (bc *basicContext) processRequest(craRequest *contract.Request, completer c
 	}
 }
 
-func (bc *basicContext) Proceed(reqItem *contract.RequestItem) *contract.ResponseItem {
+func (bc *CoreContext) Proceed(reqItem *contract.RequestItem) *contract.ResponseItem {
 
 	contract.FillRequest(reqItem)
 
@@ -116,14 +116,14 @@ func (bc *basicContext) Proceed(reqItem *contract.RequestItem) *contract.Respons
 	return contract.FormatResponse(response, reqItem.Id)
 }
 
-func (bc *basicContext) addr() string {
+func (bc *CoreContext) addr() string {
 	if bc.Opts.Port > 1000 {
 		return ":" + strconv.Itoa(bc.Opts.Port)
 	}
 	return ":9511"
 }
 
-func (bc *basicContext) shouldByPassHeader(header string) bool {
+func (bc *CoreContext) shouldByPassHeader(header string) bool {
 	if strings.HasPrefix(header, "X-") {
 		return true
 	}
