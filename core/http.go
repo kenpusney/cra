@@ -10,7 +10,7 @@ import (
 )
 
 func formatResponse(response *http.Response, requestId string) *ResponseItem {
-	resItem := &ResponseItem{Id: requestId}
+	resItem := &ResponseItem{Id: requestId, r: response}
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		resItem.Error = UpstreamErrorResponse(response)
 	}

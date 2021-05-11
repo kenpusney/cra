@@ -58,7 +58,7 @@ Started at port: 9511 Proxying: https://the-api-you-need-to-visit.com/api/v1
 层叠模式中，你可以通过jsonpath把一部分返回的数据保存在上下文中，通过Mustache模版进行接下来请求的参数化处理。
 
 例如：
-```javascript
+```json5
 {
   "mode": "cascaded",
   "requests": [
@@ -84,7 +84,7 @@ Started at port: 9511 Proxying: https://the-api-you-need-to-visit.com/api/v1
 批量模式中，你需要指定一组数据作为批量执行的种子。
 
 比如下面这个例子中，删除所有过期的资源：
-```javascript
+```json
 {
   "mode": "batch",
   "seed": {

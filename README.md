@@ -63,7 +63,7 @@ In cascaded mode, you can save response's data to a context using jsonpath, and
 retrieve it in subsequent requests using Mustache template.
 
 For example:
-```javascript
+```json
 {
   "mode": "cascaded",
   "requests": [
@@ -90,7 +90,7 @@ In batch mode, you need to specify a list of data as a seed to run the batch
 request, either in request spec or using response.
 
 For example, if you need to delete all expired resource:
-```javascript
+```json
 {
   "mode": "batch",
   "seed": {

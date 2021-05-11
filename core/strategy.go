@@ -148,6 +148,10 @@ func newContext(name string, value interface{}) map[string]interface{} {
 func asArray(object interface{}) []interface{} {
 	var result []interface{}
 
+	if object == nil {
+		return result
+	}
+
 	switch reflect.TypeOf(object).Kind() {
 	case reflect.Slice, reflect.Array:
 		value := reflect.ValueOf(object)

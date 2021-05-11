@@ -1,5 +1,7 @@
 package core
 
+import "net/http"
+
 type Opts struct {
 	Endpoint string `arg:"positional"`
 	//FollowLocation bool   `arg:"-f" default:"false"`
@@ -26,6 +28,7 @@ type RequestItem struct {
 	// only for cascaded mode
 	Cascading map[string]string `json:"cascading"`
 	Batch     *string           `json:"batch"`
+	r         *http.Request
 }
 
 type Request struct {
@@ -41,6 +44,7 @@ type ResponseItem struct {
 	Type  string         `json:"type"`
 	Error *ResponseError `json:"error"`
 	Body  interface{}    `json:"body"`
+	r     *http.Response
 }
 
 type ResponseError struct {
