@@ -1,23 +1,8 @@
-package core
+package contract
 
 import "net/http"
 
-type Opts struct {
-	Endpoint string `arg:"positional"`
-	//FollowLocation bool   `arg:"-f" default:"false"`
-	Port int `arg:"-p" default:"9511"`
-}
-
-type Strategy func(craRequest *Request, context Context, completer ResponseCompleter)
-
 type ResponseCompleter = func(response *Response)
-
-type Context interface {
-	Register(ty string, strategy Strategy)
-	Serve() error
-	Proceed(reqItem *RequestItem) *ResponseItem
-	Shutdown()
-}
 
 type RequestItem struct {
 	Id       string      `json:"id"`
@@ -56,4 +41,34 @@ type ResponseError struct {
 type Response struct {
 	Id       string          `json:"id"`
 	Response []*ResponseItem `json:"response"`
+}
+
+func (req *Request) AttachOriginalRequest(r *http.Request) {
+	for _, request := range req.Requests {
+		request.r = r
+	}
+}
+
+func (req *RequestItem) OriginalRequest() *http.Request {
+	return req.r
+}
+
+func (req *RequestItem) RequestHeaders() http.Header {
+	if req.r != nil {
+		return req.r.Header
+	}
+
+	return http.Header{}
+}
+
+func (res *Response) LatestHeaders() http.Header {
+	if len(res.Response) > 0 {
+		lastResponse := res.Response[len(res.Response)-1]
+
+		if lastResponse.r != nil {
+			return lastResponse.r.Header
+		}
+	}
+
+	return http.Header{}
 }

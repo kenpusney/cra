@@ -1,13 +1,15 @@
-package core
+package strategy
 
 import (
+	"github.com/kenpusney/cra/core/common"
+	"github.com/kenpusney/cra/core/contract"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 type TestContext struct{}
 
-func (TestContext) Register(ty string, strategy Strategy) {
+func (TestContext) Register(ty string, strategy common.Strategy) {
 	panic("implement me")
 }
 
@@ -19,8 +21,8 @@ func (TestContext) Shutdown() {
 	panic("implement me")
 }
 
-func (TestContext) Proceed(reqItem *RequestItem) *ResponseItem {
-	return &ResponseItem{
+func (TestContext) Proceed(reqItem *contract.RequestItem) *contract.ResponseItem {
+	return &contract.ResponseItem{
 		Id: reqItem.Id,
 		Body: map[string]interface{}{
 			"value": "test",
@@ -30,10 +32,10 @@ func (TestContext) Proceed(reqItem *RequestItem) *ResponseItem {
 }
 
 func TestSequential(t *testing.T) {
-	Sequential(&Request{
+	Sequential(&contract.Request{
 		Id:   "seq",
 		Mode: "seq",
-		Requests: []*RequestItem{
+		Requests: []*contract.RequestItem{
 			{
 				Id: "1",
 			},
@@ -41,7 +43,7 @@ func TestSequential(t *testing.T) {
 				Id: "2",
 			},
 		},
-	}, &TestContext{}, func(response *Response) {
+	}, &TestContext{}, func(response *contract.Response) {
 		assert.NotEmpty(t, response.Response)
 		assert.Equal(t, response.Id, "seq")
 		assert.Len(t, response.Response, 2)
@@ -49,10 +51,10 @@ func TestSequential(t *testing.T) {
 }
 
 func TestConcurrent(t *testing.T) {
-	Concurrent(&Request{
+	Concurrent(&contract.Request{
 		Id:   "con",
 		Mode: "con",
-		Requests: []*RequestItem{
+		Requests: []*contract.RequestItem{
 			{
 				Id: "1",
 			},
@@ -60,7 +62,7 @@ func TestConcurrent(t *testing.T) {
 				Id: "2",
 			},
 		},
-	}, &TestContext{}, func(response *Response) {
+	}, &TestContext{}, func(response *contract.Response) {
 		assert.NotEmpty(t, response.Response)
 		assert.Equal(t, response.Id, "con")
 		assert.Len(t, response.Response, 2)
@@ -68,10 +70,10 @@ func TestConcurrent(t *testing.T) {
 }
 
 func TestCascaded(t *testing.T) {
-	Cascaded(&Request{
+	Cascaded(&contract.Request{
 		Id:   "cascaded",
 		Mode: "cascaded",
-		Requests: []*RequestItem{
+		Requests: []*contract.RequestItem{
 			{
 				Id: "1",
 				Cascading: map[string]string{
@@ -85,7 +87,7 @@ func TestCascaded(t *testing.T) {
 				},
 			},
 		},
-	}, &TestContext{}, func(response *Response) {
+	}, &TestContext{}, func(response *contract.Response) {
 		assert.NotEmpty(t, response.Response)
 		assert.Equal(t, response.Id, "cascaded")
 		assert.Len(t, response.Response, 2)
@@ -96,22 +98,22 @@ func TestBatchWithBatchRequest(t *testing.T) {
 
 	var batchName = "values"
 
-	Batch(&Request{
+	Batch(&contract.Request{
 		Id: "batch",
-		Seed: &RequestItem{
+		Seed: &contract.RequestItem{
 			Id: "seed",
 			Cascading: map[string]string{
 				"values": "$.data",
 			},
 		},
 		Mode: "batch",
-		Requests: []*RequestItem{
+		Requests: []*contract.RequestItem{
 			{
 				Id:    "batch",
 				Batch: &batchName,
 			},
 		},
-	}, &TestContext{}, func(response *Response) {
+	}, &TestContext{}, func(response *contract.Response) {
 		assert.NotEmpty(t, response.Response)
 		assert.Equal(t, response.Id, "batch")
 		assert.Len(t, response.Response, 3)
@@ -122,19 +124,19 @@ func TestBatchWithData(t *testing.T) {
 
 	var batchName = "values"
 
-	Batch(&Request{
+	Batch(&contract.Request{
 		Id: "batch",
 		Data: CascadeContext{
 			"values": []string{"a", "b", "c"},
 		},
 		Mode: "batch",
-		Requests: []*RequestItem{
+		Requests: []*contract.RequestItem{
 			{
 				Id:    "batch",
 				Batch: &batchName,
 			},
 		},
-	}, &TestContext{}, func(response *Response) {
+	}, &TestContext{}, func(response *contract.Response) {
 		assert.NotEmpty(t, response.Response)
 		assert.Equal(t, response.Id, "batch")
 		assert.Len(t, response.Response, 3)

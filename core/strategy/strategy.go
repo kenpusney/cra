@@ -1,36 +1,39 @@
-package core
+package strategy
 
 import (
 	"encoding/json"
 	"github.com/cbroglie/mustache"
 	"github.com/google/uuid"
+	"github.com/kenpusney/cra/core/common"
+	"github.com/kenpusney/cra/core/contract"
+	"github.com/kenpusney/cra/core/util"
 	"github.com/oliveagle/jsonpath"
 	"reflect"
 )
 
-func Sequential(craRequest *Request, context Context, completer ResponseCompleter) {
-	var craResponses []*ResponseItem
-	for _, request := range craRequest.Requests {
-		request.Id = GenerateId(request.Id, uuid.New().String(), -1)
+func Sequential(craRequest *contract.Request, context common.Context, completer contract.ResponseCompleter) {
+	var craResponses []*contract.ResponseItem
+	for _, r := range craRequest.Requests {
+		r.Id = util.GenerateId(r.Id, uuid.New().String(), -1)
 		craResponses = append(craResponses,
-			context.Proceed(request))
+			context.Proceed(r))
 	}
 
-	completer(&Response{
-		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
+	completer(&contract.Response{
+		Id:       util.GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
 	})
 }
 
-func Concurrent(craRequest *Request, context Context, completer ResponseCompleter) {
-	ch := make(chan *ResponseItem, len(craRequest.Requests))
-	var craResponses []*ResponseItem
+func Concurrent(craRequest *contract.Request, context common.Context, completer contract.ResponseCompleter) {
+	ch := make(chan *contract.ResponseItem, len(craRequest.Requests))
+	var craResponses []*contract.ResponseItem
 
-	for _, request := range craRequest.Requests {
-		request.Id = GenerateId(request.Id, uuid.New().String(), -1)
-		go func(request *RequestItem) {
+	for _, r := range craRequest.Requests {
+		r.Id = util.GenerateId(r.Id, uuid.New().String(), -1)
+		go func(request *contract.RequestItem) {
 			ch <- context.Proceed(request)
-		}(request)
+		}(r)
 	}
 
 	for range craRequest.Requests {
@@ -38,8 +41,8 @@ func Concurrent(craRequest *Request, context Context, completer ResponseComplete
 		craResponses = append(craResponses, it)
 	}
 
-	completer(&Response{
-		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
+	completer(&contract.Response{
+		Id:       util.GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
 	})
 	close(ch)
@@ -47,13 +50,13 @@ func Concurrent(craRequest *Request, context Context, completer ResponseComplete
 
 type CascadeContext = map[string]interface{}
 
-func Cascaded(craRequest *Request, context Context, completer ResponseCompleter) {
-	var craResponses []*ResponseItem
-	var resItem *ResponseItem
+func Cascaded(craRequest *contract.Request, context common.Context, completer contract.ResponseCompleter) {
+	var craResponses []*contract.ResponseItem
+	var resItem *contract.ResponseItem
 	cascadeContext := make(CascadeContext)
 
 	for _, request := range craRequest.Requests {
-		request.Id = GenerateId(request.Id, uuid.New().String(), -1)
+		request.Id = util.GenerateId(request.Id, uuid.New().String(), -1)
 		if len(cascadeContext) > 0 {
 			request = rebuildRequestItem(cascadeContext, request)
 		}
@@ -68,35 +71,35 @@ func Cascaded(craRequest *Request, context Context, completer ResponseCompleter)
 		}
 	}
 
-	completer(&Response{
-		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
+	completer(&contract.Response{
+		Id:       util.GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
 	})
 }
 
-func rebuildRequestItem(cascadeContext CascadeContext, request *RequestItem) *RequestItem {
+func rebuildRequestItem(cascadeContext CascadeContext, req *contract.RequestItem) *contract.RequestItem {
 
-	endPoint, _ := mustache.Render(request.Endpoint, cascadeContext)
-	marshal, _ := json.Marshal(request.Body)
+	endPoint, _ := mustache.Render(req.Endpoint, cascadeContext)
+	marshal, _ := json.Marshal(req.Body)
 	body, _ := mustache.Render(string(marshal), cascadeContext)
 
 	var jsonBody interface{}
 
 	_ = json.Unmarshal([]byte(body), jsonBody)
-	newRequest := &RequestItem{
-		Id:       request.Id,
+	newRequest := &contract.RequestItem{
+		Id:       req.Id,
 		Endpoint: endPoint,
-		Method:   request.Method,
-		Type:     request.Type,
+		Method:   req.Method,
+		Type:     req.Type,
 		Body:     jsonBody,
 	}
 
 	return newRequest
 }
 
-func Batch(craRequest *Request, context Context, completer ResponseCompleter) {
-	var craResponses []*ResponseItem
-	var resItem *ResponseItem
+func Batch(craRequest *contract.Request, context common.Context, completer contract.ResponseCompleter) {
+	var craResponses []*contract.ResponseItem
+	var resItem *contract.ResponseItem
 
 	var seed = make(CascadeContext)
 
@@ -104,7 +107,7 @@ func Batch(craRequest *Request, context Context, completer ResponseCompleter) {
 		seed = craRequest.Data
 	} else {
 		request := craRequest.Seed
-		request.Id = GenerateId(request.Id, uuid.New().String(), -1)
+		request.Id = util.GenerateId(request.Id, uuid.New().String(), -1)
 		resItem := context.Proceed(request)
 		if request.Cascading != nil && len(request.Cascading) != 0 {
 			for key, value := range request.Cascading {
@@ -115,7 +118,7 @@ func Batch(craRequest *Request, context Context, completer ResponseCompleter) {
 	}
 
 	for _, originalRequest := range craRequest.Requests {
-		originalRequest.Id = GenerateId(originalRequest.Id, uuid.New().String(), -1)
+		originalRequest.Id = util.GenerateId(originalRequest.Id, uuid.New().String(), -1)
 
 		if originalRequest.Batch == nil {
 			break
@@ -127,7 +130,7 @@ func Batch(craRequest *Request, context Context, completer ResponseCompleter) {
 		if len(seedData) > 0 {
 			for index, value := range seedData {
 				request := rebuildRequestItem(newContext(name, value), originalRequest)
-				request.Id = GenerateId(originalRequest.Id, uuid.New().String(), index)
+				request.Id = util.GenerateId(originalRequest.Id, uuid.New().String(), index)
 				resItem = context.Proceed(request)
 				craResponses = append(craResponses,
 					resItem)
@@ -135,8 +138,8 @@ func Batch(craRequest *Request, context Context, completer ResponseCompleter) {
 		}
 	}
 
-	completer(&Response{
-		Id:       GenerateId(craRequest.Id, uuid.New().String(), -1),
+	completer(&contract.Response{
+		Id:       util.GenerateId(craRequest.Id, uuid.New().String(), -1),
 		Response: craResponses,
 	})
 }

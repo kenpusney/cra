@@ -1,6 +1,8 @@
-package core
+package context
 
 import (
+	"github.com/kenpusney/cra/core/common"
+	"github.com/kenpusney/cra/core/contract"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -14,15 +16,15 @@ func TestServerStart(t *testing.T) {
 
 func TestContextProcessingRequest(t *testing.T) {
 	withCraContext(t, func(context *basicContext) {
-		context.processRequest(&Request{
-			Id: "github-request",
-			Requests: []*RequestItem{
+		context.processRequest(&contract.Request{
+			Id: "github-contract",
+			Requests: []*contract.RequestItem{
 				{
 					Id:       "home",
 					Endpoint: "",
 				},
 			},
-		}, func(response *Response) {
+		}, func(response *contract.Response) {
 			assert.Len(t, response.Response, 1)
 		})
 	})
@@ -38,9 +40,9 @@ func withCraContext(t *testing.T, fn func(context *basicContext)) {
 }
 
 func createCraContext() (func(), func() bool, *basicContext) {
-	context := NewContext(&Opts{
+	context := MakeContext(&common.Opts{
 		Endpoint: "https://api.github.com/",
-	}).(*basicContext)
+	}, nil).(*basicContext)
 
 	chStop := make(chan string)
 

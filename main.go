@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/alexflint/go-arg"
-	"github.com/kenpusney/cra/core"
+	"github.com/kenpusney/cra/core/common"
+	"github.com/kenpusney/cra/core/init"
 	"os"
 )
 
 func main() {
-	var opts core.Opts
+	var opts common.Opts
 
 	p := arg.MustParse(&opts)
 
@@ -17,7 +18,7 @@ func main() {
 		return
 	}
 
-	context := core.NewContext(&opts)
+	context := init.NewContext(&opts)
 
 	fmt.Println("Started at port:", opts.Port, "Proxying:", opts.Endpoint)
 	_ = context.Serve()

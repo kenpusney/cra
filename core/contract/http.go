@@ -1,15 +1,20 @@
-package core
+package contract
 
 import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"github.com/kenpusney/cra/core/util"
 	"io"
 	"net/http"
 	"strings"
 )
 
-func formatResponse(response *http.Response, requestId string) *ResponseItem {
+func ErrorResponse(req *RequestItem, err error, response *http.Response) *ResponseItem {
+	return &ResponseItem{Id: req.Id, Error: SystemErrorResponse(err), r: response}
+}
+
+func FormatResponse(response *http.Response, requestId string) *ResponseItem {
 	resItem := &ResponseItem{Id: requestId, r: response}
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		resItem.Error = UpstreamErrorResponse(response)
@@ -17,10 +22,10 @@ func formatResponse(response *http.Response, requestId string) *ResponseItem {
 
 	if strings.Contains(response.Header.Get("Content-Type"), "json") {
 		resItem.Type = "json"
-		resItem.Body = ConvertJsonBodyToObject(response.Body)
+		resItem.Body = util.ConvertJsonBodyToObject(response.Body)
 	} else {
 		resItem.Type = "binary"
-		resItem.Body = ReadBytes(response.Body)
+		resItem.Body = util.ReadBytes(response.Body)
 	}
 	if resItem.Error != nil {
 		resItem.Error.Body = resItem.Body
@@ -28,7 +33,7 @@ func formatResponse(response *http.Response, requestId string) *ResponseItem {
 	return resItem
 }
 
-func decodeRequestBody(reqItem *RequestItem) io.Reader {
+func DecodeRequestBody(reqItem *RequestItem) io.Reader {
 	var requestBody io.Reader = strings.NewReader("")
 
 	if reqItem.Type == "json" {
@@ -42,7 +47,7 @@ func decodeRequestBody(reqItem *RequestItem) io.Reader {
 	return requestBody
 }
 
-func fillRequests(req *RequestItem) {
+func FillRequest(req *RequestItem) {
 	if req.Method == "" {
 		req.Method = "GET"
 	}
