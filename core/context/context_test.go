@@ -18,7 +18,7 @@ func TestServerStart(t *testing.T) {
 func TestContextProcessingRequest(t *testing.T) {
 	withCraContext(t, func(context *CoreContext) {
 		context.processRequest(&contract.Request{
-			Id:   "github-contract",
+			Id:   "baidu-contract",
 			Mode: "test",
 			Requests: []*contract.RequestItem{
 				{
@@ -29,6 +29,28 @@ func TestContextProcessingRequest(t *testing.T) {
 		}, func(response *contract.Response) {
 			assert.Len(t, response.Response, 1)
 		})
+	})
+}
+
+func TestServerHttpEndpoint(t *testing.T) {
+	withCraContext(t, func(context *CoreContext) {
+		request, _ := http.NewRequest("POST", "http://127.0.0.1:9511/", contract.EncodeRequestBody(&contract.RequestItem{
+			Type: "json",
+			Body: contract.Request{
+				Id:   "baidu-contract",
+				Mode: "test",
+				Requests: []*contract.RequestItem{
+					{
+						Id:       "home",
+						Endpoint: "",
+					},
+				},
+			},
+		}))
+
+		response, _ := context.client.Do(request)
+
+		assert.NotNil(t, response)
 	})
 }
 

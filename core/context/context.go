@@ -92,7 +92,7 @@ func (bc *CoreContext) Proceed(reqItem *contract.RequestItem) *contract.Response
 
 	contract.FillRequest(reqItem)
 
-	requestBody := contract.DecodeRequestBody(reqItem)
+	requestBody := contract.EncodeRequestBody(reqItem)
 
 	req, err := http.NewRequest(reqItem.Method, bc.Endpoint+reqItem.Endpoint, requestBody)
 

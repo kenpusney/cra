@@ -33,7 +33,7 @@ func FormatResponse(response *http.Response, requestId string) *ResponseItem {
 	return resItem
 }
 
-func DecodeRequestBody(reqItem *RequestItem) io.Reader {
+func EncodeRequestBody(reqItem *RequestItem) io.Reader {
 	var requestBody io.Reader = strings.NewReader("")
 
 	if reqItem.Type == "json" {
