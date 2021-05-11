@@ -1,4 +1,4 @@
-package init
+package boot
 
 import (
 	"github.com/kenpusney/cra/core/common"
