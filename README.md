@@ -63,7 +63,7 @@ In cascaded mode, you can save response's data to a context using jsonpath, and
 retrieve it in subsequent requests using Mustache template.
 
 For example:
-```json
+```json5
 {
   "mode": "cascaded",
   "requests": [
@@ -127,9 +127,9 @@ see `core/types.go`
 
 - [X] Implement cascading
 - [ ] Add doc
-- [ ] Bypassing headers
+- [X] Bypassing headers
 - [X] ID generating strategy
-- [ ] Unit test for `context.go`
+- [X] Unit test for `context.go`
 - [ ] Error handle
 - [ ] More options
 
@@ -139,7 +139,7 @@ see `core/types.go`
 
 ### Retrieve my GitHub Repo in batch
 
-```
+```json
 {
   "id": "batching",
   "mode": "batch",
